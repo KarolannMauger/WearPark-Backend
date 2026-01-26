@@ -1,3 +1,6 @@
 spring:
   application:
     name: app
+
+db:
+  uri: ${MONGODB_CLIENT_URI-:mongodb://localhost:27017}
