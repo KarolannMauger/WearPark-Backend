@@ -1,6 +1,7 @@
 package edu.wearpark.backend.domain;
 
-import lombok.*;
+import lombok.Builder;
+import lombok.Data;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.Instant;

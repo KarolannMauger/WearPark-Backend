@@ -1,7 +1,8 @@
 package edu.wearpark.backend;
 
-import static org.springframework.http.HttpStatus.*;
 import org.springframework.http.HttpStatusCode;
+
+import static org.springframework.http.HttpStatus.*;
 
 public enum ErrorCode {
     INTERNAL_ERROR(INTERNAL_SERVER_ERROR, "Internal server error"),

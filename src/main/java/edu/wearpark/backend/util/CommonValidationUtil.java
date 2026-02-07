@@ -1,7 +1,5 @@
 package edu.wearpark.backend.util;
 
-import java.util.regex.Pattern;
-
 public class CommonValidationUtil {
     public static boolean validatePassword(String password) {
         if(password == null) return false;

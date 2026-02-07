@@ -1,8 +1,5 @@
 package edu.wearpark.backend.security;
 
-import java.io.IOException;
-import java.util.Collections;
-
 import edu.wearpark.backend.repository.UserRepository;
 import edu.wearpark.backend.security.token.DetailedAuthToken;
 import edu.wearpark.backend.util.JwtUtil;
@@ -13,6 +10,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.bson.types.ObjectId;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+import java.util.Collections;
 
 /**
  * JWT authentication filter that intercepts incoming HTTP request

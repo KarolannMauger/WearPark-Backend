@@ -1,6 +1,7 @@
 package edu.wearpark.backend.security.token;
 
 import org.springframework.security.authentication.AbstractAuthenticationToken;
+
 import java.util.Collections;
 
 /**
