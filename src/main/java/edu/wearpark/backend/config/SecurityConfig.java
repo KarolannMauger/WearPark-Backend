@@ -14,6 +14,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
  * Configuration class responsible for defining Spring Security setting for the application.
@@ -82,7 +83,7 @@ public class SecurityConfig {
                                 .requestMatchers("/auth/**", "/public/**").permitAll()
                                 .anyRequest().authenticated()
                 );
-        //httpSecurity.addFilterBefore(jwtHttpFilter, UsernamePasswordAuthenticationFilter.class);
+        httpSecurity.addFilterBefore(jwtHttpFilter, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();
     }
 }
