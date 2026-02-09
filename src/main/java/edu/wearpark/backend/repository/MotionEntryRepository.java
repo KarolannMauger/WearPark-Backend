@@ -2,13 +2,12 @@ package edu.wearpark.backend.repository;
 
 import edu.wearpark.backend.domain.MotionEntry;
 import org.bson.types.ObjectId;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 
 public interface MotionEntryRepository extends MongoRepository<MotionEntry, ObjectId> {
     @Query(
@@ -26,5 +25,5 @@ public interface MotionEntryRepository extends MongoRepository<MotionEntry, Obje
             value = "{ 'user_id': ?0 }",
             sort  = "{ 'start': -1 }"
     )
-    Optional<MotionEntry> findLatest(ObjectId userId);
+    List<MotionEntry> findLatest(ObjectId userId, Pageable pageable);
 }

@@ -10,7 +10,7 @@ import edu.wearpark.backend.dto.MotionEntryResponse;
 import edu.wearpark.backend.exception.AppException;
 import edu.wearpark.backend.repository.MotionEntryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.nio.ByteBuffer;
@@ -65,6 +65,7 @@ public class MotionDataService {
         return entries.stream().map(this::parseMotionEntry).toList();
     }
     public Optional<MotionEntryResponse> getLatestMotionEntry(User user) {
-        return motionEntryRepo.findLatest(user.getId()).map(this::parseMotionEntry);
+        var latest = motionEntryRepo.findLatest(user.getId(), PageRequest.of(0, 1));
+        return latest.stream().findFirst().map(this::parseMotionEntry);
     }
 }
