@@ -1,0 +1,281 @@
+openapi: 3.0.3
+info:
+  title: Device Management API
+  description: REST API for managing devices and motion data.
+  version: 1.0.0
+  contact:
+    name: Your Company
+    email: support@yourcompany.com
+
+servers:
+  - url: http://localhost:8080
+    description: Local development
+
+tags:
+  - name: Devices
+    description: Device management endpoints
+  - name: Motion
+    description: Motion data endpoints
+
+paths:
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: User login to obtain JWT token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: user1
+                password:
+                  type: string
+                  example: pass123
+              required:
+                - username
+                - password
+      responses:
+        '200':
+          description: Login successful, returns JWT token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        '401':
+          description: Unauthorized, invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: User registration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: user1
+                password:
+                  type: string
+                  example: pass123
+              required:
+                - username
+                - password
+      responses:
+        '201':
+          description: Registration successful, returns JWT token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        '400':
+          description: Bad Request, username already exists or validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  /devices/{deviceId}:
+    get:
+      tags:
+        - Devices
+      summary: Register a new device to a user
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Device found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+        '404':
+          description: Device not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /motion/data:
+    post:
+      tags:
+        - Motion
+      summary: Submit motion data
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MotionDataRequest'
+      responses:
+        '201':
+          description: Motion data stored
+
+    get:
+      tags:
+        - Motion
+      summary: Get motion data by time range
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: start
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: end
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Motion data list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MotionData'
+  /motion/data/latest:
+    get:
+      tags:
+        - Motion
+      summary: Get latest motion data for a device
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: deviceId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Latest motion data for the device
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MotionData'
+        '404':
+          description: No motion data available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+
+    Device:
+      type: object
+      properties:
+        id:
+          type: string
+          example: device001
+        name:
+          type: string
+          example: Wearable Sensor
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+
+    CreateDeviceRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Wearable Sensor
+      required:
+        - name
+
+    MotionDataRequest:
+      type: object
+      properties:
+        deviceId:
+          type: string
+          example: device001
+        timestamp:
+          type: string
+          format: date-time
+        ax:
+          type: number
+          format: float
+        ay:
+          type: number
+          format: float
+        az:
+          type: number
+          format: float
+        gx:
+          type: number
+          format: float
+        gy:
+          type: number
+          format: float
+        gz:
+          type: number
+          format: float
+      required:
+        - deviceId
+        - timestamp
+
+    MotionData:
+      allOf:
+        - $ref: '#/components/schemas/MotionDataRequest'
+
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+          example: 400
+        error:
+          type: string
+          example: Bad Request
+        message:
+          type: string
+          example: Validation failed

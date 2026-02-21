@@ -51,6 +51,7 @@ public class AuthService {
                 .build();
         var user = User.builder()
                 .email(email)
+                .role("USER")
                 .isEmailValidated(false)
                 .auth(auth)
                 .build();
