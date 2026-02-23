@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,10 +22,9 @@ public class UserController {
     private final UserRepository userRepo;
     @PostMapping
     ResponseEntity<?> postUser(
-            SecurityContext securityContext,
+            @AuthenticationPrincipal User user,
             @RequestBody PatchUserRequest body
     ) {
-        var user = ((DetailedAuthToken) securityContext.getAuthentication()).getPrincipal();
         var patchedUser = User.builder()
                 .id(user.getId())
                 .gender(body.gender())
@@ -40,8 +40,7 @@ public class UserController {
     }
     @GetMapping
     ResponseEntity<UserDetailsResponse> getSelf(
-            SecurityContext securityContext,
-            @RequestBody PatchUserRequest body
+            SecurityContext securityContext
     ) {
         var user = ((DetailedAuthToken) securityContext.getAuthentication()).getPrincipal();
         return ResponseEntity.ok(UserDetailsResponse.builder()
@@ -66,6 +65,4 @@ public class UserController {
             return ResponseEntity.notFound().build();
         return ResponseEntity.ok(user.get());
     }
-
-
 }

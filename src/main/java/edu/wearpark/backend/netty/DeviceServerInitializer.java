@@ -2,7 +2,6 @@ package edu.wearpark.backend.netty;
 
 import edu.wearpark.backend.netty.handler.BusinessHandler;
 import edu.wearpark.backend.netty.handler.ProtocolDecoder;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.string.StringEncoder;

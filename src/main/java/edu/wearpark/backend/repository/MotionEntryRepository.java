@@ -17,7 +17,7 @@ public interface MotionEntryRepository extends MongoRepository<MotionEntry, Obje
                     'start': { $gte: ?1, $lte: ?2 }
                 }
                 """,
-            sort = "{ 'start': -1 }"
+            sort = "{ 'start': 1 }"
     )
     List<MotionEntry> findBetween(ObjectId userId, Instant start, Instant end);
 

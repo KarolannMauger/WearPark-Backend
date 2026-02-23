@@ -33,7 +33,7 @@ public class AuthService {
         DetailedAuthToken detailedToken =  (DetailedAuthToken) authManager.authenticate(authToken);
         return jwtUtil.generateToken(
                 detailedToken.getPrincipal().getId().toHexString(),
-                "login"
+                "auth"
         );
     }
     public User register(String email, String plain_password) {

@@ -8,10 +8,13 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -27,9 +30,10 @@ import java.util.List;
  * @version 1.0
  */
 @Component
+@RequiredArgsConstructor
 public class JwtHttpFilter extends OncePerRequestFilter {
-    @Autowired
-    JwtService jwtService;
+    private final JwtService jwtService;
+    private final Logger log;
     /**
      * Filters each HTTP request to perform JWT-based authentication.
      *
@@ -50,6 +54,7 @@ public class JwtHttpFilter extends OncePerRequestFilter {
                         new SimpleGrantedAuthority("ROLE_" + user.getRole().toUpperCase())
                 );
                 var token = new DetailedAuthToken(user, authorities);
+                token.setAuthenticated(true);
                 SecurityContextHolder.getContext().setAuthentication(token);
             });
         } finally {

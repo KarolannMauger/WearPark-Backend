@@ -54,7 +54,7 @@ class AuthServiceTest {
                     .build();
             when(authManager.authenticate(ArgumentMatchers.any()))
                     .thenReturn(new DetailedAuthToken(user, Collections.emptyList()));
-            when(jwtUtil.generateToken(user.getId().toHexString(), "login")).thenReturn("j.w.t");
+            when(jwtUtil.generateToken(user.getId().toHexString(), "auth")).thenReturn("j.w.t");
             // act
             var jwt = authService.login(new EmailPasswordAuthToken("test@test.com", "123"));
 

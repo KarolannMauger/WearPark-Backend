@@ -20,5 +20,5 @@ public class Device {
     private String deviceKey;
     @Indexed
     @Field(name = "user_id")
-    private String userId;
+    private ObjectId userId;
 }

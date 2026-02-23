@@ -1,5 +1,6 @@
 package edu.wearpark.backend.config;
 
+import jakarta.servlet.FilterChain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InjectionPoint;
