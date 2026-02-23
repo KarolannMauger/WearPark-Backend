@@ -1,5 +1,8 @@
 package edu.wearpark.backend.dto.error;
 
+import lombok.Getter;
+
+@Getter
 public class ApiError {
     String code;
     Integer httpCode;

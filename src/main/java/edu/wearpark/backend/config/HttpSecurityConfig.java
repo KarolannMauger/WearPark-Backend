@@ -1,13 +1,12 @@
 package edu.wearpark.backend.config;
 
-import edu.wearpark.backend.repository.UserRepository;
 import edu.wearpark.backend.security.EmailPasswordAuthProvider;
 import edu.wearpark.backend.security.JwtHttpFilter;
-import edu.wearpark.backend.util.JwtUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -22,21 +21,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
  * @version 1.0
  */
 @Configuration
-public class SecurityConfig {
-    /**
-     * {@link Bean} for generating a {@link JwtHttpFilter}
-     * @param jwtUtil depends on {@link JwtUtil}
-     * @param userRepository depends on {@link UserRepository}
-     * @return a new {@link JwtHttpFilter}
-     */
-    @Bean
-    public JwtHttpFilter jwtHttpFilter(
-            final JwtUtil jwtUtil,
-            final UserRepository userRepository
-    ) {
-        return new JwtHttpFilter(jwtUtil, userRepository);
-    }
-
+@EnableMethodSecurity
+public class HttpSecurityConfig {
     /**
      * Defines the password encoder bean used across the authentication process.
      * @return a {@link BCryptPasswordEncoder} INSTANCE for securely hashing password.

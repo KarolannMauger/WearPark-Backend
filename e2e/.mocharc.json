@@ -1,0 +1,5 @@
+{
+    "require": "./dist/test/setup.js",
+    "extension": ["js"],
+    "spec": ["./dist/test/**/*.test.js"]
+}

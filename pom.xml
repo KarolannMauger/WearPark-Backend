@@ -48,6 +48,12 @@
 		</dependency>
 
 		<dependency>
+			<groupId>io.netty</groupId>
+			<artifactId>netty-all</artifactId>
+			<version>4.1.10.Final</version>
+		</dependency>
+
+		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-api</artifactId>
 			<version>0.13.0</version>
@@ -136,6 +142,12 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<exclude>edu/wearpark/backend/controller/**</exclude>
+						<exclude>edu/wearpark/backend/dto/**</exclude>
+					</excludes>
+				</configuration>
 				<executions>
 					<execution>
 						<id>default-prepare-agent</id>

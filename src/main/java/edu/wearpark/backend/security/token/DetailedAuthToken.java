@@ -23,7 +23,6 @@ public class DetailedAuthToken extends AbstractAuthenticationToken {
         super(authorities);
         this.user = user;
     }
-
     /**
      * Returns the credentials of the authentication token.
      * @return the use password hash

@@ -33,7 +33,7 @@ public class AuthService {
         DetailedAuthToken detailedToken =  (DetailedAuthToken) authManager.authenticate(authToken);
         return jwtUtil.generateToken(
                 detailedToken.getPrincipal().getId().toHexString(),
-                "login"
+                "auth"
         );
     }
     public User register(String email, String plain_password) {
@@ -51,6 +51,7 @@ public class AuthService {
                 .build();
         var user = User.builder()
                 .email(email)
+                .role("USER")
                 .isEmailValidated(false)
                 .auth(auth)
                 .build();

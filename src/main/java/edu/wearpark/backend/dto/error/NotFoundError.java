@@ -1,7 +1,9 @@
 package edu.wearpark.backend.dto.error;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Getter;
 
+@Getter
 public class NotFoundError extends ApiError {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     String type;

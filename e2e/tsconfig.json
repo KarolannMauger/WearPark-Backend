@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "target": "ES2022",
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
+        "outDir": "dist",
+        "rootDir": ".",
+        "strict": false,
+        "esModuleInterop": true,
+        "allowJs": true,
+        "resolveJsonModule": true,
+        "sourceMap": false,
+        "types": ["node", "mocha"]
+  },
+  "include": ["test/**/*.ts", "test/**/*.js"],
+  "exclude": ["node_modules", "dist"]
+}

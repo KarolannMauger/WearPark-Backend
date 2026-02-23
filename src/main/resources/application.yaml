@@ -14,3 +14,10 @@ auth:
   jwt:
     secret: ${JWT_SECRET-:dev-secret-abcedefghijklmnopqrstuvwxyz}
     expiration: 1d
+
+netty:
+  port: 9000
+  server-cert-path: src/main/resources/server-test.crt
+  server-key-path:  src/main/resources/server-test.key
+  ca-cert-path:     src/main/resources/ca-test.crt
+  ca-key-path:      src/main/resources/ca-test.key

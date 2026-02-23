@@ -48,6 +48,7 @@ public class JwtUtil {
      */
     public String generateToken(String subject, String tbu) {
         return generateToken(subject, Instant.now().plus(JWT_EXPIRATION), tbu);
+
     }
     public String generateToken(String subject, Instant expiresAt, String tbu) {
         return Jwts.builder()
