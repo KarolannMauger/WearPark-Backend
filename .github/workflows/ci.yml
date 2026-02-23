@@ -1,8 +1,6 @@
 name: CI
 
 on:
-  push:
-    branches: ["**"]
   pull_request:
 
 jobs:
@@ -124,6 +122,10 @@ jobs:
       - name: Notify Teams on failure
         if: failure()
         run: |
+          if [ -z "${{ secrets.MS_TEAMS_WEBHOOK_URL }}" ]; then
+            echo "MS_TEAMS_WEBHOOK_URL not set; skipping Teams notification."
+            exit 0
+          fi
           payload=$(cat << 'EOF'
           {
             "@type": "MessageCard",
@@ -169,7 +171,7 @@ jobs:
                "${{ secrets.MS_TEAMS_WEBHOOK_URL }}"
 
       - name: Comment PR with results
-        if: always() && github.event_name == 'pull_request'
+        if: success() && github.event_name == 'pull_request'
         uses: actions/github-script@v7
         with:
           script: |
