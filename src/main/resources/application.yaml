@@ -3,8 +3,8 @@ spring:
     name: app
 
 db:
-  uri:  ${MONGODB_CLIENT_URI-:mongodb://localhost:27017/}
-  name: ${MONGODB_DB_NAME-:wearpark-dev}
+  uri:  ${MONGODB_CLIENT_URI:mongodb://localhost:27017/}
+  name: ${MONGODB_DB_NAME:wearpark-dev}
 
 auth:
   providers:
@@ -12,7 +12,7 @@ auth:
       max-attempts: 5
       lockout-duration: t5m
   jwt:
-    secret: ${JWT_SECRET-:dev-secret-abcedefghijklmnopqrstuvwxyz}
+    secret: ${JWT_SECRET:dev-secret-abcedefghijklmnopqrstuvwxyz}
     expiration: 1d
 
 netty:
