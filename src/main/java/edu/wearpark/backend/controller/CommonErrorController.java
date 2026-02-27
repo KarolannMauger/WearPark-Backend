@@ -7,6 +7,7 @@ import edu.wearpark.backend.exception.AppException;
 import edu.wearpark.backend.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
+import org.springframework.context.ApplicationContextException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -33,7 +34,7 @@ public class CommonErrorController {
     }
     @ExceptionHandler(Exception.class)
     ResponseEntity<ApiError> handleAny(Exception ex) {
-        log.error(Arrays.toString(ex.getStackTrace()));
+        log.error(ex.getMessage());
         ErrorCode ec = ErrorCode.INTERNAL_ERROR;
         ApiError body = new ApiError(ec.name(), ec.httpCode.value(), ec.description);
         return ResponseEntity.status(ec.httpCode).body(body);

@@ -17,65 +17,58 @@ import java.nio.FloatBuffer;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class MotionViewService {
-    private final byte[] NAN_FLOAT_LE = new byte[]{ (byte)0x00, (byte) 0x00, (byte) 0xC0, (byte) 0x7F};
     private final MotionEntryRepository motionRepo;
-    private final Logger log;
+
     public MotionViewGraph makeGraph(List<MotionEntry> entries, Instant start, Instant end, Duration interval) {
-        final long intervalMs = interval.toMillis();
-        final int totalSample = (int) ((end.toEpochMilli() - start.toEpochMilli()) / intervalMs);
+        final long binDurationMs   = interval.toMillis();
+        final int binListSize     = (int) ((end.toEpochMilli() - start.toEpochMilli()) / binDurationMs);
+
         ///
-        ByteBuffer buffer = ByteBuffer
-                .allocate(totalSample * 4)
-                .order(ByteOrder.LITTLE_ENDIAN);
-        for(int i = 0; i<buffer.limit(); i+=4)
-            buffer.put(i, NAN_FLOAT_LE);
+        float[] binAcc  = new float[binListSize];
+        Arrays.fill(binAcc, 0.0f);
+        int[] binCount  = new int[binListSize];
+        Arrays.fill(binCount, 0);
 
-        float sampleMin = Float.POSITIVE_INFINITY;
-        float sampleMax = Float.NEGATIVE_INFINITY;
-
-        float   sampleAcc       = 0.0f;
-        int     sampleTotal     = 0;
-        int     sampleIndex     = 0;
-        //
-        entryLoop:
         for (MotionEntry entry : entries) {
-            var dataList = new MotionDataListWrapper(entry.getData());
-            int entryIndexOffset = (int) ((entry.getStart().toEpochMilli()-start.toEpochMilli()) / intervalMs);
-            for (int dataIndex = 0; dataIndex < dataList.size(); dataIndex++) {
-                MotionDataWrapper data = dataList.get(dataIndex);
-                int projectedSampleIndex = entryIndexOffset + (int) (data.offsetMs() / intervalMs);
-                //System.out.println(dataIndex);
-                if(sampleTotal == 0)
-                    sampleIndex = projectedSampleIndex;
-                if (sampleIndex < projectedSampleIndex) {
-                    // make sure we are not overflowing the buffer
-                    if (sampleIndex > totalSample)
-                        break entryLoop;
-                    // set the data in buffer
-                    sampleAcc /= (float) sampleTotal;
-                    sampleMin = Math.min(sampleAcc, sampleMin);
-                    sampleMax = Math.max(sampleAcc, sampleMax);
-                    buffer.putFloat(sampleIndex * 4, sampleAcc);
+            var dataList     = new MotionDataListWrapper(entry.getData());
+            long entryDataIndexOffset = (entry.getStart().toEpochMilli() - start.toEpochMilli())/ binDurationMs;
+            for(int dataIndex = 0; dataIndex < dataList.size(); dataIndex++) {
+                var data = dataList.get(dataIndex);
+                int sampleIndex = (int) (entryDataIndexOffset + (data.offsetMs() / binDurationMs));
+                if(sampleIndex < 0 || sampleIndex >= binListSize)
+                    continue;
 
-                    // reset the accumulator
-                    sampleAcc   = 0F;
-                    sampleTotal = 0;
-                    sampleIndex = projectedSampleIndex;
-                }
-                sampleAcc += data.accGeometricMean();
-                sampleTotal += 1;
+                var acc = data.accGeometricMean();
+                binAcc[sampleIndex] += acc*acc;
+                binCount[sampleIndex] += 1;
             }
-        } /* motion entries list loop */
+        }
+
+        float min = Float.POSITIVE_INFINITY;
+        float max = Float.POSITIVE_INFINITY;
+        ByteBuffer buffer = ByteBuffer
+                .allocate(binListSize * 4)
+                .order(ByteOrder.LITTLE_ENDIAN);
+        for(int i = 0; i<binListSize; i++) {
+            float mean =  binAcc[i] / binCount[i];
+            float value = (float) Math.sqrt(mean);
+            if(!Float.isNaN(value)) {
+                min = Math.min(value, min);
+                max = Math.max(value, max);
+            }
+            buffer.putFloat(i*4, value);
+        }
         return MotionViewGraph.builder()
-                .min(sampleMin)
-                .max(sampleMax)
                 .end(end)
                 .start(start)
+                .min(Float.isFinite(min) ? min : Float.NaN)
+                .max(Float.isFinite(max) ? max : Float.NaN)
                 .data(buffer.array())
                 .build();
     }

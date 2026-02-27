@@ -3,7 +3,6 @@ package edu.wearpark.backend.util;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
-import java.util.Optional;
 
 public class MotionDataListWrapper {
     private final ByteBuffer buffer;
@@ -20,6 +19,9 @@ public class MotionDataListWrapper {
     public void reset() {
         ptr = 0;
         Arrays.fill(buffer.array(), (byte) 0x00);
+    }
+    public MotionDataWrapper getFirst() {
+        return new MotionDataWrapper(buffer.array(), 0);
     }
     public MotionDataWrapper getLast() {
         return new MotionDataWrapper(buffer.array(), size()-1);
