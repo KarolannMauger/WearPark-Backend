@@ -81,7 +81,7 @@ public class MotionViewService {
         Instant end = start.plus(Duration.ofDays(1));
 
         // get the motions data
-        var interval = Duration.ofMinutes(10);
+        var interval = Duration.ofMinutes(1);
         var entries = motionRepo.findBetween(user.getId(), start, end);
         var graph   = makeGraph(
                 entries,
