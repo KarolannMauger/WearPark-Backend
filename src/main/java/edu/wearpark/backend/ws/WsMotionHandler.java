@@ -21,7 +21,7 @@ public class WsMotionHandler extends TextWebSocketHandler {
             new ConcurrentHashMap<>();
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
-        User user = (User) session.getAttributes().get("user");
+        User user = (User) session.getAttributes().get("principal");
         sessions.put(user.getId(), session);
     }
     @Override
