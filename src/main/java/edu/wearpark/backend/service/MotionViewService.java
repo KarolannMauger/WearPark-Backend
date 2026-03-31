@@ -51,7 +51,7 @@ public class MotionViewService {
         }
 
         float min = Float.POSITIVE_INFINITY;
-        float max = Float.POSITIVE_INFINITY;
+        float max = Float.NEGATIVE_INFINITY;
         ByteBuffer buffer = ByteBuffer
                 .allocate(binListSize * 4)
                 .order(ByteOrder.LITTLE_ENDIAN);
@@ -67,8 +67,8 @@ public class MotionViewService {
         return MotionViewGraph.builder()
                 .end(end)
                 .start(start)
-                .min(Float.isFinite(min) ? min : Float.NaN)
-                .max(Float.isFinite(max) ? max : Float.NaN)
+                .min(min)
+                .max(max)
                 .data(buffer.array())
                 .build();
     }
