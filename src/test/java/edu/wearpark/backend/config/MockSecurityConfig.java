@@ -24,7 +24,7 @@ import java.util.Optional;
 @TestConfiguration
 public class MockSecurityConfig {
     final public static User defaultUserStub = User.builder()
-            .id(new ObjectId("0"))
+            .id(new ObjectId("000000000000000000000000"))
             .email("test@user.com")
             .build();
     public static class AuthMiddleware {
