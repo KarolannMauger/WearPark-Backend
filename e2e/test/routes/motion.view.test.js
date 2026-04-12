@@ -26,7 +26,7 @@ describe("Motion View Route", function() {
             //     console.log(`Value: ${value}`);
             // }
             expect(response.status).to.equal(200);
-            expect(view.byteLength).to.equal(144*4);
+            expect(view.byteLength).to.equal(1440*4);
         });
     });
 });

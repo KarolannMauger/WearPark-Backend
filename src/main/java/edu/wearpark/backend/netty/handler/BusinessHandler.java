@@ -7,16 +7,22 @@ import edu.wearpark.backend.netty.protocol.SingleMessage;
 import edu.wearpark.backend.netty.protocol.TimestampMessage;
 import edu.wearpark.backend.repository.MotionEntryRepository;
 import edu.wearpark.backend.util.MotionDataListWrapper;
+import edu.wearpark.backend.ws.WsMotionHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.RequiredArgsConstructor;
+import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
+import org.springframework.web.socket.BinaryMessage;
 import org.w3c.dom.Attr;
 
 import javax.naming.InvalidNameException;
 import javax.net.ssl.SSLPeerUnverifiedException;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.time.Instant;
 
 @Component
@@ -25,7 +31,15 @@ import java.time.Instant;
 public class BusinessHandler extends SimpleChannelInboundHandler<Message> {
     private final Logger log;
     private final MotionEntryRepository motionEntryRepo;
-    private void handleSingle(ChannelHandlerContext ctx, SingleMessage message) throws InvalidNameException, SSLPeerUnverifiedException {
+    private final WsMotionHandler wsMotionHandler;
+    private void broadcastWs(ObjectId userId, SingleMessage message) throws IOException {
+        ByteBuffer buffer = ByteBuffer
+                .allocate(4)
+                .order(ByteOrder.LITTLE_ENDIAN);
+        buffer.putFloat(0, message.getWrapper().accGeometricMean());
+        wsMotionHandler.sendTo(userId, new BinaryMessage(buffer));
+    }
+    private void handleSingle(ChannelHandlerContext ctx, SingleMessage message) throws InvalidNameException, IOException {
         var device    = ctx.channel().attr(Attributes.DEVICE).get();
         var timestamp = ctx.channel().attr(Attributes.TIMESTAMP).get();
         var lastEntry = ctx.channel().attr(Attributes.LAST_ENTRY).get();
@@ -38,7 +52,7 @@ public class BusinessHandler extends SimpleChannelInboundHandler<Message> {
         ///
         var output = dataList.get();
         if(output == null) {
-            Instant     end         = Instant.ofEpochMilli(dataList.getLast().offsetMs() + timestamp.toEpochMilli());
+            Instant     end         = Instant.ofEpochMilli(dataList.getLast().offsetMs() + lastEntry.toEpochMilli());
             MotionEntry motionEntry = MotionEntry.builder()
                     .start(lastEntry)
                     .end(end)
@@ -57,7 +71,8 @@ public class BusinessHandler extends SimpleChannelInboundHandler<Message> {
         output.copyFrom(input);
         System.out.println("TCP DATA IN: [" + device.getDeviceKey() + "] " + input.accGeometricMean());
         output.setOffsetMs((int) (input.offsetMs() - lastEntry.toEpochMilli() + timestamp.toEpochMilli()));
-
+        ///
+        broadcastWs(device.getUserId(), message);
     }
     private void handleTimestamp(ChannelHandlerContext ctx, TimestampMessage message) throws Exception {
         ctx.channel().attr(Attributes.TIMESTAMP).set(message.getTimestamp());

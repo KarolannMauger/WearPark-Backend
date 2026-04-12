@@ -66,7 +66,7 @@ public class HttpSecurityConfig {
                 )
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                .requestMatchers("/auth/**", "/public/**").permitAll()
+                                .requestMatchers("/auth/**", "/public/**", "/ws/**").permitAll()
                                 .anyRequest().authenticated()
                 );
         httpSecurity.addFilterBefore(jwtHttpFilter, UsernamePasswordAuthenticationFilter.class);
