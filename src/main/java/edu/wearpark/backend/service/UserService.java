@@ -1,6 +1,7 @@
 package edu.wearpark.backend.service;
 
 import edu.wearpark.backend.domain.User;
+import edu.wearpark.backend.dto.UserSummaryResponse;
 import edu.wearpark.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -9,10 +10,14 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
     private final MongoTemplate mongoTemplate;
+    private final UserRepository userRepo;
+
     public boolean patchUser(User user) {
         Query query = new Query(Criteria.where("id").is(user.getId()));
         Update update = new Update();
@@ -45,5 +50,19 @@ public class UserService {
         return mongoTemplate
                 .updateFirst(query, update, User.class)
                 .getModifiedCount() > 0;
+    }
+
+    public List<UserSummaryResponse> getAllUsers() {
+        return userRepo.findAll()
+                .stream()
+                .map(user -> new UserSummaryResponse(
+                        user.getId(),
+                        user.getEmail(),
+                        user.getFirstName(),
+                        user.getLastName(),
+                        user.getRole(),
+                        user.getCreatedAt()
+                ))
+                .toList();
     }
 }

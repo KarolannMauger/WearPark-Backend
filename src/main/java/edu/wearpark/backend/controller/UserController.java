@@ -3,6 +3,7 @@ package edu.wearpark.backend.controller;
 import edu.wearpark.backend.domain.User;
 import edu.wearpark.backend.dto.PatchUserRequest;
 import edu.wearpark.backend.dto.UserDetailsResponse;
+import edu.wearpark.backend.dto.UserSummaryResponse;
 import edu.wearpark.backend.repository.UserRepository;
 import edu.wearpark.backend.security.token.DetailedAuthToken;
 import edu.wearpark.backend.service.UserService;
@@ -13,6 +14,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/user")
@@ -64,5 +67,12 @@ public class UserController {
         if(user.isEmpty())
             return ResponseEntity.notFound().build();
         return ResponseEntity.ok(user.get());
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/all")
+    ResponseEntity<List<UserSummaryResponse>> getAllUsers(){
+        var users = userService.getAllUsers();
+        return ResponseEntity.ok(users);
     }
 }
