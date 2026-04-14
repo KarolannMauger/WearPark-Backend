@@ -7,6 +7,7 @@ import edu.wearpark.backend.netty.protocol.MessageType;
 import edu.wearpark.backend.netty.protocol.SingleMessage;
 import edu.wearpark.backend.netty.protocol.TimestampMessage;
 import edu.wearpark.backend.repository.MotionEntryRepository;
+import edu.wearpark.backend.service.MlService;
 import edu.wearpark.backend.util.MotionDataListWrapper;
 import edu.wearpark.backend.util.MotionDataWrapper;
 import edu.wearpark.backend.ws.WsMotionHandler;
@@ -29,16 +30,18 @@ class BusinessHandlerTest {
     private Logger log;
     private MotionEntryRepository repo;
     private WsMotionHandler wsMotionHandler;
+    private MlService mlService;
     private BusinessHandler handler;
     private EmbeddedChannel channel;
 
     @BeforeEach
     void setup() {
-        log = mock(Logger.class);
-        repo = mock(MotionEntryRepository.class);
+        log             = mock(Logger.class);
+        repo            = mock(MotionEntryRepository.class);
         wsMotionHandler = mock(WsMotionHandler.class);
-        handler = new BusinessHandler(log, repo, wsMotionHandler);
-        channel = new EmbeddedChannel(handler);
+        mlService       = mock(MlService.class);
+        handler         = new BusinessHandler(log, repo, wsMotionHandler, mlService);
+        channel         = new EmbeddedChannel(handler);
     }
 
     @Test

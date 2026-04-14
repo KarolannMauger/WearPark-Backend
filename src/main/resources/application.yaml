@@ -21,3 +21,7 @@ netty:
   server-key-path:  src/main/resources/server-test.key
   ca-cert-path:     src/main/resources/ca-test.crt
   ca-key-path:      src/main/resources/ca-test.key
+
+ml:
+  hf-space-url: ${ML_HF_SPACE_URL:https://karolannmauger-wearpark-ml.hf.space}
+  hf-token:     ${ML_HF_TOKEN:}

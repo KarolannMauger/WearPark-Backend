@@ -67,6 +67,33 @@ export const mochaHooks = {
             user_id: new ObjectId("000000000000000000000001"),
             device_key: "device-test",
          });
+
+        /// setup predictions
+        await db.collection("predictions").deleteMany({});
+        await db.collection("predictions").insertMany([
+            {
+                _id: new ObjectId("000000000000000000000010"),
+                motion_entry_id: new ObjectId("000000000000000000000001"),
+                user_id: new ObjectId("000000000000000000000001"),
+                state: "ok",
+                label: "Non-Parkinson",
+                probability: 0.12,
+                confidence: "high",
+                prediction: 0,
+                created_at: new Date("2024-01-01T01:00:00Z"),
+            },
+            {
+                _id: new ObjectId("000000000000000000000011"),
+                motion_entry_id: new ObjectId("000000000000000000000002"),
+                user_id: new ObjectId("000000000000000000000001"),
+                state: "parkinson",
+                label: "Parkinson",
+                probability: 0.82,
+                confidence: "high",
+                prediction: 1,
+                created_at: new Date("2024-01-01T02:00:00Z"),
+            },
+        ]);
     },
     async afterAll() {
         await dbClient.close();
