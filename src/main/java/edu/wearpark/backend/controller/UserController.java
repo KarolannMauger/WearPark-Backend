@@ -9,6 +9,8 @@ import edu.wearpark.backend.security.token.DetailedAuthToken;
 import edu.wearpark.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -52,27 +54,10 @@ public class UserController {
                 .userPreferences(user.getPreferences())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
+                .role(user.getRole())
                 .dateOfBirth(user.getDateOfBirth())
                 .hasDiagnosis(user.getHasDiagnosis())
                 .diagnosis(user.getDiagnosis())
                 .build());
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/{userId}")
-    ResponseEntity<User> getAnyUser(
-            @PathVariable String userId
-    ) {
-        var user = userRepo.findById(new ObjectId(userId));
-        if(user.isEmpty())
-            return ResponseEntity.notFound().build();
-        return ResponseEntity.ok(user.get());
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/all")
-    ResponseEntity<List<UserSummaryResponse>> getAllUsers(){
-        var users = userService.getAllUsers();
-        return ResponseEntity.ok(users);
     }
 }

@@ -4,6 +4,8 @@ import edu.wearpark.backend.domain.User;
 import edu.wearpark.backend.dto.UserSummaryResponse;
 import edu.wearpark.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -52,9 +54,8 @@ public class UserService {
                 .getModifiedCount() > 0;
     }
 
-    public List<UserSummaryResponse> getAllUsers() {
-        return userRepo.findAll()
-                .stream()
+    public Page<UserSummaryResponse> getAllUsers(Pageable pageable) {
+        return userRepo.findAll(pageable)
                 .map(user -> new UserSummaryResponse(
                         user.getId(),
                         user.getEmail(),
@@ -62,7 +63,6 @@ public class UserService {
                         user.getLastName(),
                         user.getRole(),
                         user.getCreatedAt()
-                ))
-                .toList();
+                ));
     }
 }

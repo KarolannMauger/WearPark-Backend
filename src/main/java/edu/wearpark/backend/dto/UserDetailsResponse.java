@@ -11,6 +11,7 @@ public record UserDetailsResponse(
    String gender,
    String firstName,
    String lastName,
+   String role,
    Instant dateOfBirth,
    Boolean hasDiagnosis,
    String diagnosis,
