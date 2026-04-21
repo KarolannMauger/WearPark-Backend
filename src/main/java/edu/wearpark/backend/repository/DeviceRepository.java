@@ -9,4 +9,6 @@ import java.util.Optional;
 
 public interface DeviceRepository extends MongoRepository<Device, ObjectId> {
     Optional<Device> findByDeviceKey(String deviceKey);
+
+    Optional<Device> findByDeviceKeyAndIsActiveTrue(String deviceKey);
 }

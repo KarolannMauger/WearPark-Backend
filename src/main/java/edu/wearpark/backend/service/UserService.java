@@ -2,8 +2,10 @@ package edu.wearpark.backend.service;
 
 import edu.wearpark.backend.domain.User;
 import edu.wearpark.backend.dto.UserSummaryResponse;
+import edu.wearpark.backend.exception.NotFoundException;
 import edu.wearpark.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -12,6 +14,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -54,15 +57,30 @@ public class UserService {
                 .getModifiedCount() > 0;
     }
 
+    public void softDeleteUser(String id) {
+        User user = userRepo.findById(new ObjectId(id))
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
+        if (Boolean.TRUE.equals(user.getIsDeleted())) {
+            return;
+        }
+
+        user.setIsDeleted(true);
+        user.setDeletedAt(Instant.now());
+
+        userRepo.save(user);
+    }
+
     public Page<UserSummaryResponse> getAllUsers(Pageable pageable) {
         return userRepo.findAll(pageable)
                 .map(user -> new UserSummaryResponse(
-                        user.getId(),
+                        user.getId().toHexString(),
                         user.getEmail(),
                         user.getFirstName(),
                         user.getLastName(),
                         user.getRole(),
-                        user.getCreatedAt()
+                        user.getCreatedAt(),
+                        user.getIsDeleted()
                 ));
     }
 }

@@ -8,11 +8,12 @@ import java.time.Instant;
 
 @Builder
 public record UserSummaryResponse(
-   ObjectId id,
+   String id,
    String email,
    String firstName,
    String lastName,
    String role,
-   Instant createdAt
+   Instant createdAt,
+   Boolean isDeleted
 ) {
 }

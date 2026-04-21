@@ -55,4 +55,12 @@ public class User {
     private Instant createdAt;
     @LastModifiedDate
     private Instant updatedAt;
+
+    // soft delete
+    @Field(name = "deleted")
+    @Builder.Default
+    private Boolean isDeleted = false;
+
+    @Field(name = "deleted_at")
+    private Instant deletedAt;
 }

@@ -43,21 +43,4 @@ public class UserController {
         userService.patchUser(patchedUser);
         return ResponseEntity.noContent().build();
     }
-    @GetMapping
-    ResponseEntity<UserDetailsResponse> getSelf(
-            SecurityContext securityContext
-    ) {
-        var user = ((DetailedAuthToken) securityContext.getAuthentication()).getPrincipal();
-        return ResponseEntity.ok(UserDetailsResponse.builder()
-                .gender(user.getGender())
-                .email(user.getEmail())
-                .userPreferences(user.getPreferences())
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .role(user.getRole())
-                .dateOfBirth(user.getDateOfBirth())
-                .hasDiagnosis(user.getHasDiagnosis())
-                .diagnosis(user.getDiagnosis())
-                .build());
-    }
 }

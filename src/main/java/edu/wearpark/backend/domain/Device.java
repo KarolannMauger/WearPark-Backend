@@ -31,4 +31,9 @@ public class Device {
     private Instant createdAt;
     @LastModifiedDate
     private Instant updatedAt;
+
+    @Field("is_active")
+    private Boolean isActive = true;
+    @Field("revoked_at")
+    private Instant revokedAt;
 }
