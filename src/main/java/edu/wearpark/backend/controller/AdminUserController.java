@@ -1,6 +1,7 @@
 package edu.wearpark.backend.controller;
 
 import edu.wearpark.backend.domain.User;
+import edu.wearpark.backend.dto.AdminUserDetailsResponse;
 import edu.wearpark.backend.dto.PagedResponse;
 import edu.wearpark.backend.dto.UserSummaryResponse;
 import edu.wearpark.backend.repository.UserRepository;
@@ -41,10 +42,8 @@ public class AdminUserController {
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<User> getUser(@PathVariable String userId) {
-        return userRepo.findById(new ObjectId(userId))
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<AdminUserDetailsResponse> getUser(@PathVariable String userId) {
+        return ResponseEntity.ok(userService.getAdminUserDetails(userId));
     }
 
     @DeleteMapping("/{id}")
