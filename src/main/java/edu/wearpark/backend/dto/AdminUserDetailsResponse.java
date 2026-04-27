@@ -9,7 +9,12 @@ public record AdminUserDetailsResponse(
         String firstName,
         String lastName,
         String role,
+        Instant dateOfBirth,
+        String gender,
+        Boolean hasDiagnosis,
+        String diagnosis,
         Instant createdAt,
-        List<DeviceSummaryResponse> devices
+        Instant updatedAt,
+        List<DeviceAdminResponse> devices
 ) {
 }

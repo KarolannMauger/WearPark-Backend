@@ -1,8 +1,12 @@
 package edu.wearpark.backend.service;
 
 import edu.wearpark.backend.domain.User;
+import edu.wearpark.backend.dto.AdminUserDetailsResponse;
+import edu.wearpark.backend.dto.DeviceAdminResponse;
+import edu.wearpark.backend.dto.UpdateUserAdminRequest;
 import edu.wearpark.backend.dto.UserSummaryResponse;
 import edu.wearpark.backend.exception.NotFoundException;
+import edu.wearpark.backend.repository.DeviceRepository;
 import edu.wearpark.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
@@ -22,6 +26,7 @@ import java.util.List;
 public class UserService {
     private final MongoTemplate mongoTemplate;
     private final UserRepository userRepo;
+    private final DeviceRepository deviceRepo;
 
     public boolean patchUser(User user) {
         Query query = new Query(Criteria.where("id").is(user.getId()));
@@ -82,5 +87,57 @@ public class UserService {
                         user.getCreatedAt(),
                         user.getIsDeleted()
                 ));
+    }
+
+    public AdminUserDetailsResponse getAdminUserDetails(String userId) {
+
+        User user = userRepo.findById(new ObjectId(userId))
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
+        List<DeviceAdminResponse> devices = deviceRepo.findByUserId(user.getId())
+                .stream()
+                .map(d -> new DeviceAdminResponse(
+                        d.getId().toHexString(),
+                        d.getDeviceKey(),
+                        d.getIsActive(),
+                        d.getCreatedAt(),
+                        d.getRevokedAt()
+                ))
+                .toList();
+
+        return new AdminUserDetailsResponse(
+                user.getId().toHexString(),
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getRole(),
+                user.getDateOfBirth(),
+                user.getGender(),
+                user.getHasDiagnosis(),
+                user.getDiagnosis(),
+                user.getCreatedAt(),
+                user.getUpdatedAt(),
+                devices
+        );
+    }
+
+    public AdminUserDetailsResponse updateUserAdmin(
+            String userId,
+            UpdateUserAdminRequest request
+    ) {
+
+        User user = userRepo.findById(new ObjectId(userId))
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
+        if (request.firstName() != null) user.setFirstName(request.firstName());
+        if (request.lastName() != null) user.setLastName(request.lastName());
+        if (request.role() != null) user.setRole(request.role());
+        if (request.gender() != null) user.setGender(request.gender());
+
+        if (request.diagnosis() != null) user.setDiagnosis(request.diagnosis());
+
+        userRepo.save(user);
+
+        return getAdminUserDetails(userId);
     }
 }
