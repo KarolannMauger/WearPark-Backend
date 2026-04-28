@@ -27,13 +27,15 @@ public class Device {
     private ObjectId userId;
 
     // audit
+    @Field(name = "created_at")
     @CreatedDate
     private Instant createdAt;
+    @Field(name = "updated_at")
     @LastModifiedDate
     private Instant updatedAt;
 
     @Field("is_active")
-    private Boolean isActive = true;
+    private Boolean isActive;
     @Field("revoked_at")
     private Instant revokedAt;
 }

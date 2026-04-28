@@ -51,8 +51,10 @@ public class User {
     private PasswordAuth auth;
 
     // audit
+    @Field(name = "created_at")
     @CreatedDate
     private Instant createdAt;
+    @Field(name = "updated_at")
     @LastModifiedDate
     private Instant updatedAt;
 
