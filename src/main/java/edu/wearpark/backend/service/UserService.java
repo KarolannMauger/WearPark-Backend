@@ -117,6 +117,7 @@ public class UserService {
                 user.getDiagnosis(),
                 user.getCreatedAt(),
                 user.getUpdatedAt(),
+                user.getIsDeleted(),
                 devices
         );
     }

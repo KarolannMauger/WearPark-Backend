@@ -15,6 +15,7 @@ public record AdminUserDetailsResponse(
         String diagnosis,
         Instant createdAt,
         Instant updatedAt,
+        Boolean isDeleted,
         List<DeviceAdminResponse> devices
 ) {
 }
