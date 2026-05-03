@@ -1,8 +1,10 @@
 package edu.wearpark.backend.domain;
 
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -15,6 +17,8 @@ import java.time.Instant;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Document(collection = "devices")
 public class Device {
     @MongoId

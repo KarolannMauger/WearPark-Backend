@@ -1,14 +1,9 @@
 package edu.wearpark.backend.controller;
 
-import edu.wearpark.backend.domain.User;
-import edu.wearpark.backend.dto.AdminUserDetailsResponse;
-import edu.wearpark.backend.dto.PagedResponse;
-import edu.wearpark.backend.dto.UpdateUserAdminRequest;
-import edu.wearpark.backend.dto.UserSummaryResponse;
+import edu.wearpark.backend.dto.*;
 import edu.wearpark.backend.repository.UserRepository;
 import edu.wearpark.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -56,6 +51,15 @@ public class AdminUserController {
         return ResponseEntity.ok(
                 userService.updateUserAdmin(userId, request)
         );
+    }
+
+    @PatchMapping("/{userId}/role")
+    public ResponseEntity<Void> updateUserRole(
+            @PathVariable String userId,
+            @RequestBody UpdateUserRoleRequest request
+    ) {
+        userService.updateUserRole(userId, request.role());
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")

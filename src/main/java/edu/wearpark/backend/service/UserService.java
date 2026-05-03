@@ -141,4 +141,14 @@ public class UserService {
 
         return getAdminUserDetails(userId);
     }
+
+    public void updateUserRole(String userId, String role) {
+
+        User user = userRepo.findById(new ObjectId(userId))
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
+        user.setRole(role);
+
+        userRepo.save(user);
+    }
 }
