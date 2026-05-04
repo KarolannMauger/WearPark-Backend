@@ -1,6 +1,6 @@
 package edu.wearpark.backend.dto;
 
-public record UpdateUserAdminRequest(
+public record PatchUserAdminRequest(
         String firstName,
         String lastName,
         String role,

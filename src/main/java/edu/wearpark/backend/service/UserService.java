@@ -3,7 +3,7 @@ package edu.wearpark.backend.service;
 import edu.wearpark.backend.domain.User;
 import edu.wearpark.backend.dto.AdminUserDetailsResponse;
 import edu.wearpark.backend.dto.DeviceAdminResponse;
-import edu.wearpark.backend.dto.UpdateUserAdminRequest;
+import edu.wearpark.backend.dto.PatchUserAdminRequest;
 import edu.wearpark.backend.dto.UserSummaryResponse;
 import edu.wearpark.backend.exception.NotFoundException;
 import edu.wearpark.backend.repository.DeviceRepository;
@@ -124,7 +124,7 @@ public class UserService {
 
     public AdminUserDetailsResponse updateUserAdmin(
             String userId,
-            UpdateUserAdminRequest request
+            PatchUserAdminRequest request
     ) {
 
         User user = userRepo.findById(new ObjectId(userId))

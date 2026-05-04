@@ -46,7 +46,7 @@ public class AdminUserController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AdminUserDetailsResponse> updateUser(
             @PathVariable String userId,
-            @RequestBody UpdateUserAdminRequest request
+            @RequestBody PatchUserAdminRequest request
     ) {
         return ResponseEntity.ok(
                 userService.updateUserAdmin(userId, request)
@@ -56,7 +56,7 @@ public class AdminUserController {
     @PatchMapping("/{userId}/role")
     public ResponseEntity<Void> updateUserRole(
             @PathVariable String userId,
-            @RequestBody UpdateUserRoleRequest request
+            @RequestBody PatchUserRoleRequest request
     ) {
         userService.updateUserRole(userId, request.role());
         return ResponseEntity.noContent().build();

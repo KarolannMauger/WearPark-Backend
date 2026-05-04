@@ -15,6 +15,7 @@ public record UserDetailsResponse(
    Instant dateOfBirth,
    Boolean hasDiagnosis,
    String diagnosis,
-   UserPreferences userPreferences
+   UserPreferences userPreferences,
+   DeviceUserResponse device
 ) {
 }

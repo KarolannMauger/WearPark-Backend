@@ -13,5 +13,7 @@ public interface DeviceRepository extends MongoRepository<Device, ObjectId> {
 
     Optional<Device> findByDeviceKeyAndIsActiveTrue(String deviceKey);
 
+    Optional<Device> findByUserIdAndIsActiveTrue(ObjectId userId);
+
     List<Device> findByUserId(ObjectId userId);
 }

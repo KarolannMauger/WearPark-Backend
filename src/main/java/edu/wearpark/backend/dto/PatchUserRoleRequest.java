@@ -1,5 +1,5 @@
 package edu.wearpark.backend.dto;
 
-public record UpdateUserRoleRequest(
+public record PatchUserRoleRequest(
         String role
 ) {}
