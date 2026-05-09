@@ -70,8 +70,8 @@ public class MotionViewService {
         return MotionGraph.builder()
                 .end(end)
                 .start(start)
-                .min(Float.isFinite(min) ? min : Float.NaN)
-                .max(Float.isFinite(max) ? max : Float.NaN)
+                .min(min)
+                .max(max)
                 .data(buffer.array())
                 .build();
     }

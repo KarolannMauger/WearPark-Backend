@@ -52,7 +52,7 @@ public class BusinessHandler extends SimpleChannelInboundHandler<Message> {
         ///
         var output = dataList.get();
         if(output == null) {
-            Instant     end         = Instant.ofEpochMilli(dataList.getLast().offsetMs() + timestamp.toEpochMilli());
+            Instant     end         = Instant.ofEpochMilli(dataList.getLast().offsetMs() + lastEntry.toEpochMilli());
             MotionEntry motionEntry = MotionEntry.builder()
                     .start(lastEntry)
                     .end(end)
