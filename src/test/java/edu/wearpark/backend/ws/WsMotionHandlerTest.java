@@ -32,7 +32,7 @@ class WsMotionHandlerTest {
                 .build();
 
         when(session.getAttributes())
-                .thenReturn(Map.of("user", user));
+                .thenReturn(Map.of("principal", user));
 
         handler.afterConnectionEstablished(session);
 
@@ -49,7 +49,7 @@ class WsMotionHandlerTest {
                 .build();
 
         when(session.getAttributes())
-                .thenReturn(Map.of("user", user));
+                .thenReturn(Map.of("principal", user));
 
         handler.afterConnectionEstablished(session);
 
@@ -81,8 +81,8 @@ class WsMotionHandlerTest {
                 .id(userId)
                 .build();
 
-        when(session1.getAttributes()).thenReturn(Map.of("user", user));
-        when(session2.getAttributes()).thenReturn(Map.of("user", user));
+        when(session1.getAttributes()).thenReturn(Map.of("principal", user));
+        when(session2.getAttributes()).thenReturn(Map.of("principal", user));
 
         handler.afterConnectionEstablished(session1);
         handler.afterConnectionEstablished(session2);
