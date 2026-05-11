@@ -16,7 +16,6 @@ describe("Motion View Route", function() {
             const response = await axiosInst.get("motion/view/day", {
                 params: {
                     date: new Date("2024-01-01").toISOString(),
-                    episodeThreshold: 11
                 },
                 headers: { Authorization: `Bearer ${jwt}`}
             });
@@ -26,7 +25,7 @@ describe("Motion View Route", function() {
             //     console.log(`Value: ${value}`);
             // }
             expect(response.status).to.equal(200);
-            expect(view.byteLength).to.equal(1440*4);
+            expect(view.byteLength).to.equal(5760);
         });
     });
 });

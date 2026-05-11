@@ -1,4 +1,4 @@
-package edu.wearpark.backend.dto;
+package edu.wearpark.backend.dto.view;
 
 import lombok.Builder;
 
