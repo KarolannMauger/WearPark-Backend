@@ -34,6 +34,11 @@ class CommonValidationUtilTest {
             assertFalse(CommonValidationUtil.validatePassword("Qw123bcdefghij"));
         }
         @Test
+        void whenNullOrEmpty_shouldFail() {
+            assertFalse(CommonValidationUtil.validateEmail(null));
+            assertFalse(CommonValidationUtil.validateEmail("asd"));
+        }
+        @Test
         void happyPath() {
             assertTrue(CommonValidationUtil.validatePassword("Qw@123bcdefghij"));
         }

@@ -1,7 +1,9 @@
 package edu.wearpark.backend.controller;
 
 import edu.wearpark.backend.domain.User;
-import edu.wearpark.backend.dto.MotionViewGraphExtended;
+import edu.wearpark.backend.dto.view.MotionViewDailyAnalysis;
+import edu.wearpark.backend.dto.view.MotionViewMonthlyAnalysis;
+import edu.wearpark.backend.mapper.MotionViewMapper;
 import edu.wearpark.backend.service.MotionViewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,14 +20,21 @@ import java.time.Instant;
 @RequestMapping("/motion/view")
 public class MotionViewController {
     private final MotionViewService motionViewService;
+
     @GetMapping("/day")
-    ResponseEntity<MotionViewGraphExtended> getDay(
+    ResponseEntity<MotionViewDailyAnalysis> getDay(
             @AuthenticationPrincipal User user,
-            @RequestParam(name = "date") Instant date,
-            @RequestParam(name = "episodeThreshold", required = false) Float episodeThreshold
+            @RequestParam(name = "date") Instant date
     ) {
-        if(episodeThreshold == null)
-            episodeThreshold = 20.0f;
-        return ResponseEntity.ok(motionViewService.makeGraphExtended(date, user, episodeThreshold));
+        return ResponseEntity.ok(MotionViewMapper.mapDay(motionViewService.makeDailyAnalysis(date, user)));
     }
+
+    @GetMapping("/month")
+    ResponseEntity<MotionViewMonthlyAnalysis> getMonth(
+            @AuthenticationPrincipal User user,
+            @RequestParam(name = "date") Instant date
+    ) {
+        return ResponseEntity.ok(MotionViewMapper.mapMonth(motionViewService.makeMonthlyAnalysis(date, user)));
+    }
+
 }

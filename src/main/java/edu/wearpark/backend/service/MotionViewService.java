@@ -2,21 +2,21 @@ package edu.wearpark.backend.service;
 
 import edu.wearpark.backend.domain.MotionEntry;
 import edu.wearpark.backend.domain.User;
-import edu.wearpark.backend.dto.MotionViewGraphExtended;
-import edu.wearpark.backend.dto.MotionViewGraph;
+import edu.wearpark.backend.domain.view.MotionDailyAnalysis;
+import edu.wearpark.backend.domain.view.MotionDailySummary;
+import edu.wearpark.backend.domain.view.MotionGraph;
+import edu.wearpark.backend.domain.view.MotionMonthlyAnalysis;
 import edu.wearpark.backend.repository.MotionEntryRepository;
+import edu.wearpark.backend.util.DateUtil;
 import edu.wearpark.backend.util.MotionDataListWrapper;
-import edu.wearpark.backend.util.MotionDataWrapper;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.ZoneOffset;
+import java.time.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -24,10 +24,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MotionViewService {
     private final MotionEntryRepository motionRepo;
-
-    public MotionViewGraph makeGraph(List<MotionEntry> entries, Instant start, Instant end, Duration interval) {
-        final long binDurationMs   = interval.toMillis();
-        final int binListSize     = (int) ((end.toEpochMilli() - start.toEpochMilli()) / binDurationMs);
+    private final MotionViewCacheService cacheService;
+    private final Duration GRAPH_RESOLUTION = Duration.ofMinutes(1);
+    private MotionGraph makeGraph(List<MotionEntry> entries, Instant start, Instant end, Duration resolution) {
+        final long binDurationMs    = resolution.toMillis();
+        final int binListSize       = (int) ((end.toEpochMilli() - start.toEpochMilli()) / binDurationMs);
 
         ///
         float[] binAcc  = new float[binListSize];
@@ -56,83 +57,130 @@ public class MotionViewService {
                 .allocate(binListSize * 4)
                 .order(ByteOrder.LITTLE_ENDIAN);
         for(int i = 0; i<binListSize; i++) {
-            float mean =  binAcc[i] / binCount[i];
-            float value = (float) Math.sqrt(mean);
-            if(!Float.isNaN(value)) {
+            float value;
+            if(binCount[i] == 0) {
+                value = Float.NaN;
+            } else {
+                value = (float) Math.sqrt(binAcc[i] / binCount[i]);
                 min = Math.min(value, min);
                 max = Math.max(value, max);
             }
             buffer.putFloat(i*4, value);
         }
-        return MotionViewGraph.builder()
+        return MotionGraph.builder()
                 .end(end)
                 .start(start)
-                .min(min)
-                .max(max)
+                .min(Float.isFinite(min) ? min : Float.NaN)
+                .max(Float.isFinite(max) ? max : Float.NaN)
                 .data(buffer.array())
                 .build();
     }
-    public MotionViewGraphExtended makeGraphExtended(Instant date, User user, float episodeThreshold) {
-        // floor the date to the current day
-        Instant start = date.atZone(ZoneOffset.UTC)
-                .toLocalDate()
-                .atStartOfDay()
-                .toInstant(ZoneOffset.UTC);
-        Instant end = start.plus(Duration.ofDays(1));
 
-        // get the motions data
-        var interval = Duration.ofMinutes(1);
+    public MotionDailyAnalysis makeDailyAnalysis(Instant date, User user) {
+        var interval = DateUtil.getDayInterval(date);
+        final Instant start = interval.getFirst();
+        final Instant end   = interval.getSecond();
+
+        var cachedAnalysis = cacheService.getDailyAnalysis(start, user.getId());
+        if(cachedAnalysis.isPresent())
+            return cachedAnalysis.get();
+
         var entries = motionRepo.findBetween(user.getId(), start, end);
-        var graph   = makeGraph(
-                entries,
-                start,
-                end,
-                interval
-        );
-        ///
+        var graph   = makeGraph(entries, start, end, GRAPH_RESOLUTION);
+
         FloatBuffer buffer = ByteBuffer
-                .wrap(graph.data())
+                .wrap(graph.getData())
                 .order(ByteOrder.LITTLE_ENDIAN)
                 .asFloatBuffer();
 
-        int     totalEpisode    = 0;
-        int     totalDurationMs = 0;
-        int     lastEpisode     = -1;
-        float   totalIntensity  = 0.0f;
+        double meanAmplitude = 0.0;
+        double peakAmplitude = graph.getMax();
+        double variance      = 0.0;
+        double coverage      = 0.0;
+        int    sampleCount   = 0;
 
-        int   episodeTotalSample = 0;
-        int   episodeStart = 0;
-        float episodeSampleAcc = 0.0f;
-
-        for(int i = 0; i<buffer.limit(); i++) {
-            float sample = buffer.get(i);
-            if(Float.isNaN(sample) || sample < episodeThreshold) {
-                if(episodeTotalSample == 0)
-                    continue;
-                totalEpisode    += 1;
-                totalDurationMs += interval.toMillis()*(i-episodeStart);
-                totalIntensity  += episodeSampleAcc / episodeTotalSample;
-                lastEpisode      = episodeStart;
-                episodeTotalSample  = 0;
-                episodeStart        = 0;
-                episodeSampleAcc    = 0.0f;
-            } else {
-                if (episodeTotalSample == 0)
-                    episodeStart = i;
-                episodeSampleAcc += sample;
-                episodeTotalSample += 1;
-            }
+        for(var i = 0; i<buffer.limit(); i++) {
+            var sample = buffer.get(i);
+            if(Float.isNaN(sample))
+                continue;
+            meanAmplitude += sample;
+            peakAmplitude  = Math.max(sample, peakAmplitude);
+            sampleCount   += 1;
         }
 
-        ///
-        return MotionViewGraphExtended
-                .builder()
-                .date(start)
-                .avgIntensity(totalEpisode > 0 ? totalIntensity/totalEpisode : 0)
-                .avgDurationMs(totalEpisode > 0 ?  totalDurationMs/totalEpisode : 0)
-                .nbEpisode(totalEpisode)
-                .lastEpisode(lastEpisode == -1 ? null : start.plus(Duration.ofMillis(interval.toMillis()*lastEpisode)))
+        if(sampleCount > 0) {
+            meanAmplitude /= sampleCount;
+            coverage = (double) sampleCount / buffer.limit();
+            for(var i = 0; i<buffer.limit(); i++) {
+                var sample = buffer.get(i);
+                if(Float.isNaN(sample))
+                    continue;
+                double deviation = sample - meanAmplitude;
+                variance += deviation*deviation;
+            }
+            variance /= sampleCount;
+        }
+
+        var analysis =  MotionDailyAnalysis.builder()
+                .start(start)
+                .end(end)
+                .coverage(coverage)
+                .meanAmplitude(meanAmplitude)
+                .peakAmplitude(peakAmplitude)
+                .variance(variance)
                 .graph(graph)
+                .build();
+        cacheService.putDailyAnalysis(analysis, user.getId());
+        return analysis;
+
+    }
+    public MotionMonthlyAnalysis makeMonthlyAnalysis(Instant date, User user) {
+        var interval = DateUtil.getMonthInterval(date);
+        final Instant start = interval.getFirst();
+        final Instant end   = interval.getSecond();
+
+        var cachedAnalysis = cacheService.getMonthlyAnalysis(start, user.getId());
+        if(cachedAnalysis.isPresent())
+            return cachedAnalysis.get();
+
+        double coverage         = 0;
+        double meanAmplitude    = 0;
+        ArrayList<MotionDailySummary> days = new ArrayList<>();
+        for(
+                var currentDate = start;
+                currentDate.isBefore(end);
+                currentDate = currentDate.plus(Duration.ofDays(1)))
+        {
+            var dailyAnalysis = makeDailyAnalysis(currentDate, user);
+            var dailySummary = MotionDailySummary
+                    .builder()
+                    .start(dailyAnalysis.getStart())
+                    .end(dailyAnalysis.getEnd())
+                    .coverage(dailyAnalysis.getCoverage())
+                    .meanAmplitude(dailyAnalysis.getMeanAmplitude())
+                    .peakAmplitude(dailyAnalysis.getPeakAmplitude())
+                    .variance(dailyAnalysis.getVariance())
+                    .deltaMeanAmplitude(0.0)
+                    .build();
+            try {
+                var prevSummary = days.getLast();
+                dailySummary.setDeltaMeanAmplitude(dailySummary.getMeanAmplitude() - prevSummary.getMeanAmplitude());
+            } catch (Exception ignored){}
+            coverage      += dailyAnalysis.getCoverage();
+            meanAmplitude += dailyAnalysis.getMeanAmplitude();
+            days.add(dailySummary);
+        }
+        coverage      /= days.size();
+        meanAmplitude /= days.size();
+
+        return MotionMonthlyAnalysis.builder()
+                //.id()
+                //.userId()
+                .start(start)
+                .end(end)
+                .coverage(coverage)
+                .meanAmplitude(meanAmplitude)
+                .days(days)
                 .build();
     }
 }

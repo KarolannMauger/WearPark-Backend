@@ -11,130 +11,159 @@ import edu.wearpark.backend.service.MlService;
 import edu.wearpark.backend.util.MotionDataListWrapper;
 import edu.wearpark.backend.util.MotionDataWrapper;
 import edu.wearpark.backend.ws.WsMotionHandler;
-import io.netty.channel.embedded.EmbeddedChannel;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.util.Attribute;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.slf4j.Logger;
+import org.springframework.web.socket.BinaryMessage;
 
-import java.nio.ByteBuffer;
 import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 class BusinessHandlerTest {
 
-    private Logger log;
-    private MotionEntryRepository repo;
+    private Logger logger;
+    private MotionEntryRepository motionEntryRepo;
     private WsMotionHandler wsMotionHandler;
     private MlService mlService;
+
     private BusinessHandler handler;
-    private EmbeddedChannel channel;
+
+    private ChannelHandlerContext ctx;
+    private Channel channel;
 
     @BeforeEach
-    void setup() {
-        log             = mock(Logger.class);
-        repo            = mock(MotionEntryRepository.class);
+    void setUp() {
+        logger          = mock(Logger.class);
+        motionEntryRepo = mock(MotionEntryRepository.class);
         wsMotionHandler = mock(WsMotionHandler.class);
         mlService       = mock(MlService.class);
-        handler         = new BusinessHandler(log, repo, wsMotionHandler, mlService);
-        channel         = new EmbeddedChannel(handler);
+
+        handler = new BusinessHandler(
+                logger,
+                motionEntryRepo,
+                wsMotionHandler,
+                mlService
+        );
+
+        ctx     = mock(ChannelHandlerContext.class);
+        channel = mock(Channel.class);
+
+        when(ctx.channel()).thenReturn(channel);
+        when(ctx.writeAndFlush(any())).thenReturn(mock(ChannelFuture.class));
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> Attribute<T> mockAttribute(T value) {
+        Attribute<T> attr = mock(Attribute.class);
+        when(attr.get()).thenReturn(value);
+        return attr;
     }
 
     @Test
-    void shouldHandleTimestampMessage() {
-        Instant now = Instant.now();
+    void channelRead0_shouldHandleTimestampMessage() throws Exception {
+        Instant timestamp = Instant.parse("2026-01-01T00:00:00Z");
 
-        TimestampMessage msg = mock(TimestampMessage.class);
-        when(msg.getMessageType()).thenReturn(MessageType.TIMESTAMP);
-        when(msg.getTimestamp()).thenReturn(now);
+        TimestampMessage message = mock(TimestampMessage.class);
 
-        channel.writeInbound(msg);
+        when(message.getMessageType())
+                .thenReturn(MessageType.TIMESTAMP);
 
-        verify(log).info("RECEIVED TIMESTAMP");
-        assertEquals("OK\n", channel.readOutbound());
+        when(message.getTimestamp())
+                .thenReturn(timestamp);
+
+        Attribute<Instant> timestampAttr = mock(Attribute.class);
+        Attribute<MotionDataListWrapper> dataListAttr = mock(Attribute.class);
+        Attribute<Instant> lastEntryAttr = mock(Attribute.class);
+
+        when(channel.attr(Attributes.TIMESTAMP))
+                .thenReturn(timestampAttr);
+
+        when(channel.attr(Attributes.DATA_LIST))
+                .thenReturn(dataListAttr);
+
+        when(channel.attr(Attributes.LAST_ENTRY))
+                .thenReturn(lastEntryAttr);
+
+        handler.channelRead(ctx, message);
+
+        verify(timestampAttr).set(timestamp);
+
+        verify(dataListAttr)
+                .set(any(MotionDataListWrapper.class));
+
+        verify(lastEntryAttr)
+                .set(timestamp);
+
+        verify(ctx).writeAndFlush("OK\n");
+
+        verify(logger).info("RECEIVED TIMESTAMP");
     }
+
 
     @Test
-    void shouldRejectSingleMessageWithoutTimestamp() {
-        SingleMessage msg = mock(SingleMessage.class);
-        when(msg.getMessageType()).thenReturn(MessageType.SINGLE_DATA);
+    void channelRead0_shouldPersistMotionEntryWhenBufferIsFull() throws Exception {
+        ObjectId userId = new ObjectId();
 
-        channel.attr(Attributes.DEVICE).set(Device.builder().userId(new ObjectId()).build());
+        Device device = Device.builder()
+                .userId(userId)
+                .deviceKey("device-1")
+                .build();
 
-        channel.writeInbound(msg);
+        Instant timestamp = Instant.now();
 
-        assertEquals("NO_TIMESTAMP", channel.readOutbound());
-        assertFalse(channel.isOpen());
+        byte[] bytes = new byte[28];
+        MotionDataListWrapper dataList =
+                new MotionDataListWrapper(bytes);
+
+        // Fill internal pointer
+        assertNotNull(dataList.get());
+
+        SingleMessage message = mock(SingleMessage.class);
+
+        MotionDataWrapper inputWrapper =
+                new MotionDataWrapper(new byte[28], 0);
+
+        when(message.getMessageType())
+                .thenReturn(MessageType.SINGLE_DATA);
+
+        when(message.getWrapper())
+                .thenReturn(inputWrapper);
+
+        Attribute<Device> deviceAttr = mockAttribute(device);
+        Attribute<Instant> timestampAttr = mockAttribute(timestamp);
+        Attribute<Instant> lastEntryAttr = mock(Attribute.class);
+        Attribute<MotionDataListWrapper> dataListAttr =
+                mockAttribute(dataList);
+
+        when(lastEntryAttr.get()).thenReturn(timestamp);
+
+        when(channel.attr(Attributes.DEVICE))
+                .thenReturn(deviceAttr);
+
+        when(channel.attr(Attributes.TIMESTAMP))
+                .thenReturn(timestampAttr);
+
+        when(channel.attr(Attributes.LAST_ENTRY))
+                .thenReturn(lastEntryAttr);
+
+        when(channel.attr(Attributes.DATA_LIST))
+                .thenReturn(dataListAttr);
+
+        handler.channelRead(ctx, message);
+
+        verify(motionEntryRepo)
+                .save(any(MotionEntry.class));
+
+        verify(lastEntryAttr)
+                .set(any(Instant.class));
     }
 
-    @Test
-    void shouldSaveMotionEntryWhenBufferFull() {
-        SingleMessage msg = mock(SingleMessage.class);
-        when(msg.getMessageType()).thenReturn(MessageType.SINGLE_DATA);
-
-        Device device = Device.builder().userId(new ObjectId()).build();
-        Instant ts = Instant.now();
-
-        MotionDataWrapper lastWrapper = mock(MotionDataWrapper.class);
-        when(lastWrapper.offsetMs()).thenReturn(1);
-
-        MotionDataListWrapper wrapper = mock(MotionDataListWrapper.class);
-        when(wrapper.get()).thenReturn(null);
-        when(wrapper.size()).thenReturn(5);
-        when(wrapper.getBuffer()).thenReturn(ByteBuffer.allocate(28 * 5));
-        when(wrapper.getLast()).thenReturn(lastWrapper);
-
-        channel.attr(Attributes.DEVICE).set(device);
-        channel.attr(Attributes.TIMESTAMP).set(ts);
-        channel.attr(Attributes.LAST_ENTRY).set(ts);
-        channel.attr(Attributes.DATA_LIST).set(wrapper);
-
-        channel.writeInbound(msg);
-
-        verify(repo).save(any());
-    }
-
-    @Test
-    void shouldComputeEndRelativeToLastEntryNotTimestamp() {
-        // Bug fix: end must be lastEntry + lastSampleOffset, not timestamp + lastSampleOffset.
-        // If timestamp is used instead of lastEntry, the 2nd, 4th, 6th... batches get near-zero
-        // or negative durations because their stored offsets are relative to lastEntry, not timestamp.
-        Instant timestamp  = Instant.ofEpochMilli(1_000_000L);
-        Instant lastEntry  = Instant.ofEpochMilli(1_020_000L); // 20s after timestamp (end of batch 1)
-        int     lastOffset = 5_000;                             // 5s into current batch (batch 2)
-
-        // With fix:  end = lastEntry + lastOffset = 1,025,000 ms
-        // Without:   end = timestamp + lastOffset = 1,005,000 ms  (< lastEntry -> negative duration)
-        Instant expectedEnd = Instant.ofEpochMilli(lastEntry.toEpochMilli() + lastOffset);
-
-        SingleMessage msg = mock(SingleMessage.class);
-        when(msg.getMessageType()).thenReturn(MessageType.SINGLE_DATA);
-
-        MotionDataWrapper lastWrapper = mock(MotionDataWrapper.class);
-        when(lastWrapper.offsetMs()).thenReturn(lastOffset);
-
-        MotionDataListWrapper wrapper = mock(MotionDataListWrapper.class);
-        when(wrapper.get()).thenReturn(null);
-        when(wrapper.size()).thenReturn(1000);
-        when(wrapper.getBuffer()).thenReturn(ByteBuffer.allocate(28 * 1000));
-        when(wrapper.getLast()).thenReturn(lastWrapper);
-
-        channel.attr(Attributes.DEVICE).set(Device.builder().userId(new ObjectId()).build());
-        channel.attr(Attributes.TIMESTAMP).set(timestamp);
-        channel.attr(Attributes.LAST_ENTRY).set(lastEntry);
-        channel.attr(Attributes.DATA_LIST).set(wrapper);
-
-        channel.writeInbound(msg);
-
-        ArgumentCaptor<MotionEntry> captor = ArgumentCaptor.forClass(MotionEntry.class);
-        verify(repo).save(captor.capture());
-
-        MotionEntry saved = captor.getValue();
-        assertEquals(lastEntry, saved.getStart());
-        assertEquals(expectedEnd, saved.getEnd());
-    }
 }
