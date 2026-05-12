@@ -6,6 +6,7 @@ import edu.wearpark.backend.netty.protocol.Message;
 import edu.wearpark.backend.netty.protocol.SingleMessage;
 import edu.wearpark.backend.netty.protocol.TimestampMessage;
 import edu.wearpark.backend.repository.MotionEntryRepository;
+import edu.wearpark.backend.service.MlService;
 import edu.wearpark.backend.util.MotionDataListWrapper;
 import edu.wearpark.backend.ws.WsMotionHandler;
 import io.netty.channel.ChannelHandler;
@@ -29,9 +30,10 @@ import java.time.Instant;
 @ChannelHandler.Sharable
 @RequiredArgsConstructor
 public class BusinessHandler extends SimpleChannelInboundHandler<Message> {
-    private final Logger log;
+    private final Logger                log;
     private final MotionEntryRepository motionEntryRepo;
-    private final WsMotionHandler wsMotionHandler;
+    private final WsMotionHandler       wsMotionHandler;
+    private final MlService             mlService;
     private void broadcastWs(ObjectId userId, SingleMessage message) throws IOException {
         ByteBuffer buffer = ByteBuffer
                 .allocate(4)
@@ -61,6 +63,7 @@ public class BusinessHandler extends SimpleChannelInboundHandler<Message> {
                     .data(dataList.getBuffer().array().clone())
                     .build();
             motionEntryRepo.save(motionEntry);
+            mlService.predictAndSave(motionEntry, device.getUserId());
             ctx.channel().attr(Attributes.LAST_ENTRY).set(end);
             dataList.reset();
             output = dataList.get();
