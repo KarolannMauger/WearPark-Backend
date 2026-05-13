@@ -2,20 +2,18 @@ package edu.wearpark.backend.dto;
 
 import edu.wearpark.backend.domain.UserPreferences;
 import lombok.Builder;
+import org.bson.types.ObjectId;
 
 import java.time.Instant;
 
 @Builder
-public record UserDetailsResponse(
+public record UserSummaryResponse(
+   String id,
    String email,
-   String gender,
    String firstName,
    String lastName,
    String role,
-   Instant dateOfBirth,
-   Boolean hasDiagnosis,
-   String diagnosis,
-   UserPreferences userPreferences,
-   DeviceUserResponse device
+   Instant createdAt,
+   Boolean isDeleted
 ) {
 }

@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -47,4 +49,20 @@ public class User {
     private Boolean isEmailValidated;
     @Field(name = "auth")
     private PasswordAuth auth;
+
+    // audit
+    @Field(name = "created_at")
+    @CreatedDate
+    private Instant createdAt;
+    @Field(name = "updated_at")
+    @LastModifiedDate
+    private Instant updatedAt;
+
+    // soft delete
+    @Field(name = "deleted")
+    @Builder.Default
+    private Boolean isDeleted = false;
+
+    @Field(name = "deleted_at")
+    private Instant deletedAt;
 }

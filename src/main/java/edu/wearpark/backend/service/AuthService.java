@@ -31,6 +31,11 @@ public class AuthService {
     PasswordEncoder pwdEncoder;
     public String login(AbstractAuthenticationToken authToken) throws AppException {
         DetailedAuthToken detailedToken =  (DetailedAuthToken) authManager.authenticate(authToken);
+
+        if (Boolean.TRUE.equals(detailedToken.getPrincipal().getIsDeleted())) {
+            throw new AppException(ErrorCode.ACCOUNT_DELETED);
+        }
+
         return jwtUtil.generateToken(
                 detailedToken.getPrincipal().getId().toHexString(),
                 "auth"

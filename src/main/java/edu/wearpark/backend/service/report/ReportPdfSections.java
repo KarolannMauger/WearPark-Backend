@@ -157,8 +157,8 @@ public final class ReportPdfSections {
 
         if (col > 0) {
             for (int i = col; i < 7; i++) sb.append("<td class='cal-cell cal-empty'>&#160;</td>");
-            sb.append("</tr>");
         }
+        sb.append("</tr>");  // toujours fermer la dernière ligne (même si col==0, i.e. semaine complète)
         sb.append("</tbody></table>\n");
 
         sb.append("<p style='font-size:8px;color:").append(C_MUTED).append(";margin-top:4px;'>"

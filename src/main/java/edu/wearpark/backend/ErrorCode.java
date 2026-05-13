@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatusCode;
 import static org.springframework.http.HttpStatus.*;
 
 public enum ErrorCode {
+    ACCOUNT_DELETED(FORBIDDEN, "Account has been deleted"),
     INTERNAL_ERROR(INTERNAL_SERVER_ERROR, "Internal server error"),
     BAD_REQUEST_BODY(BAD_REQUEST, "Request body is incorrectly formed"),
     RESOURCE_NOT_FOUND(NOT_FOUND, "Resource not found"),
