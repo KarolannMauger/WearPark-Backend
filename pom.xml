@@ -85,6 +85,18 @@
 			<scope>provided</scope>
 		</dependency>
 
+		<!-- HTML → PDF report generation -->
+		<dependency>
+			<groupId>io.github.openhtmltopdf</groupId>
+			<artifactId>openhtmltopdf-pdfbox</artifactId>
+			<version>1.1.37</version>
+		</dependency>
+		<dependency>
+			<groupId>io.github.openhtmltopdf</groupId>
+			<artifactId>openhtmltopdf-svg-support</artifactId>
+			<version>1.1.37</version>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
@@ -150,6 +162,13 @@
 					<excludes>
 						<exclude>edu/wearpark/backend/controller/**</exclude>
 						<exclude>edu/wearpark/backend/dto/**</exclude>
+						<!-- PDF report helpers: pure static string builders, no business logic to test -->
+						<exclude>edu/wearpark/backend/service/report/ReportPdfConstants.class</exclude>
+						<exclude>edu/wearpark/backend/service/report/ReportPdfCss.class</exclude>
+						<exclude>edu/wearpark/backend/service/report/ReportPdfHtmlUtils.class</exclude>
+						<exclude>edu/wearpark/backend/service/report/ReportPdfModels.class</exclude>
+						<exclude>edu/wearpark/backend/service/report/ReportPdfModels$*.class</exclude>
+						<exclude>edu/wearpark/backend/service/report/ReportPdfSections.class</exclude>
 					</excludes>
 				</configuration>
 				<executions>

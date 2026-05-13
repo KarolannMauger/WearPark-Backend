@@ -23,7 +23,9 @@ public class MotionViewCacheService {
         if(Instant.now().isBefore(motionDailyAnalysis.getEnd()))
             return;
         motionDailyAnalysis.setUserId(userId);
-        motionDailyAnalysis.setId(null);
+
+        var existing = motionDailyAnalysisRepository.findByUserIdAndStart(userId, motionDailyAnalysis.getStart());
+        motionDailyAnalysis.setId(existing.map(MotionDailyAnalysis::getId).orElse(null));
         motionDailyAnalysisRepository.save(motionDailyAnalysis);
     }
     public Optional<MotionDailyAnalysis> getDailyAnalysis(Instant date, ObjectId userId) {
