@@ -237,8 +237,8 @@ class MotionViewServiceTest {
         assertFalse(result.getDays().isEmpty());
 
         assertEquals(
-                result.getDays().size(),
-                30
+                31,
+                result.getDays().size()
         );
 
         assertEquals(

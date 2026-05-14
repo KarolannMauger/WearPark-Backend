@@ -22,7 +22,7 @@ class DateUtilTest {
         );
 
         assertEquals(
-                Instant.parse("2026-05-10T00:00:00Z"),
+                Instant.parse("2026-05-09T23:59:59Z"),
                 result.getSecond()
         );
     }
@@ -41,7 +41,7 @@ class DateUtilTest {
         );
 
         assertEquals(
-                Instant.parse("2026-05-09T04:00:00Z"),
+                Instant.parse("2026-05-09T03:59:59Z"),
                 result.getSecond()
         );
     }
@@ -58,7 +58,7 @@ class DateUtilTest {
         );
 
         assertEquals(
-                Instant.parse("2026-02-28T00:00:00Z"),
+                Instant.parse("2026-02-28T23:59:59Z"),
                 result.getSecond()
         );
     }
@@ -77,7 +77,7 @@ class DateUtilTest {
         );
 
         assertEquals(
-                Instant.parse("2026-03-31T04:00:00Z"),
+                Instant.parse("2026-04-01T03:59:59Z"),
                 result.getSecond()
         );
     }
@@ -94,7 +94,7 @@ class DateUtilTest {
         );
 
         assertEquals(
-                Instant.parse("2024-02-29T00:00:00Z"),
+                Instant.parse("2024-02-29T23:59:59Z"),
                 result.getSecond()
         );
     }

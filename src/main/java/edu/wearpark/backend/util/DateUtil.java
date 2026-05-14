@@ -2,6 +2,7 @@ package edu.wearpark.backend.util;
 
 import org.springframework.data.util.Pair;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.temporal.TemporalAdjusters;
@@ -21,6 +22,7 @@ public class DateUtil {
         var end = zonedDate
                 .plusDays(1)
                 .atStartOfDay(zone)
+                .minus(Duration.ofSeconds(1))
                 .toInstant();
         return Pair.of(start, end);
     }
@@ -36,6 +38,8 @@ public class DateUtil {
         var end = zonedDate
                 .with(TemporalAdjusters.lastDayOfMonth())
                 .atStartOfDay(zone)
+                .plusDays(1)
+                .minusSeconds(1)
                 .toInstant();
         return Pair.of(start, end);
     }
