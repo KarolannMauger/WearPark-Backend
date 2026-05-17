@@ -3,7 +3,6 @@
 ![Java](https://img.shields.io/badge/Java-21-ED8B00?style=flat&logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.0.2-6DB33F?style=flat&logo=springboot&logoColor=white)
 ![MongoDB](https://img.shields.io/badge/MongoDB-8.x-47A248?style=flat&logo=mongodb&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-green?style=flat)
 
 > REST and WebSocket backend for real-time Parkinsonian tremor monitoring.
 > Part of the **WearPark** research project.
