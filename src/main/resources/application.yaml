@@ -17,10 +17,10 @@ auth:
 
 netty:
   port: 9000
-  server-cert-path: src/main/resources/server-test.crt
-  server-key-path:  src/main/resources/server-test.key
-  ca-cert-path:     src/main/resources/ca-test.crt
-  ca-key-path:      src/main/resources/ca-test.key
+  server-cert-path: ${NETTY_SERVER_CERT_PATH:/app/certs/server.crt}
+  server-key-path:  ${NETTY_SERVER_KEY_PATH:/app/certs/server.key}
+  ca-cert-path:     ${NETTY_CA_CERT_PATH:/app/certs/ca.crt}
+  ca-key-path:      ${NETTY_CA_KEY_PATH:/app/certs/ca.key}
 
 ml:
   hf-space-url: ${ML_HF_SPACE_URL:https://karolannmauger-wearpark-ml.hf.space}
