@@ -27,4 +27,4 @@ COPY src/main/resources/ca-test.key     /app/certs/ca.key
 EXPOSE 8080
 EXPOSE 9000
 
-ENTRYPOINT ["sh", "-c", "java -jar app.jar --server.port=${PORT:-8080}"]
+ENTRYPOINT ["java", "-jar", "app.jar", "--server.port=8080"]
