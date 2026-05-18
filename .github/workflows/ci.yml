@@ -47,6 +47,11 @@ jobs:
           cache-dependency-path: e2e/package-lock.json
 
       - name: Unit tests + JaCoCo report
+        env:
+          NETTY_SERVER_CERT_PATH: src/main/resources/server-test.crt
+          NETTY_SERVER_KEY_PATH: src/main/resources/server-test.key
+          NETTY_CA_CERT_PATH: src/main/resources/ca-test.crt
+          NETTY_CA_KEY_PATH: src/main/resources/ca-test.key
         run: mvn -B verify
 
       - name: Enforce coverage >= 80% and write coverage.json
