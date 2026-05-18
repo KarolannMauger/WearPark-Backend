@@ -2,6 +2,13 @@ name: CI
 
 on:
   pull_request:
+    branches:
+      - main
+      - develop
+  push:
+    branches:
+      - main
+      - develop
 
 jobs:
   build-test:
@@ -206,3 +213,5 @@ jobs:
               // Don't fail the workflow if comment fails
             }
 
+  # Deploy is handled automatically by Railway ("Wait for CI" enabled in Railway settings).
+  # Railway triggers a deployment on push to main only after all CI jobs pass.
