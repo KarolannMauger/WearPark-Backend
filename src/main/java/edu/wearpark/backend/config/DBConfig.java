@@ -14,6 +14,7 @@ import org.springframework.data.mongodb.core.convert.DefaultDbRefResolver;
 import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
+import org.springframework.data.mongodb.core.MongoTemplate;
 
 import java.time.Instant;
 import java.util.Date;
@@ -54,6 +55,15 @@ public class DBConfig {
         converter.setCustomConversions(customConversions());
         converter.afterPropertiesSet();
         return converter;
+    }
+
+    @Bean
+    @Primary
+    public MongoTemplate mongoTemplate(
+            MongoDatabaseFactory factory,
+            MappingMongoConverter converter
+    ) {
+        return new MongoTemplate(factory, converter);
     }
 
     static class DateToInstantConverter implements Converter<Date, Instant> {
