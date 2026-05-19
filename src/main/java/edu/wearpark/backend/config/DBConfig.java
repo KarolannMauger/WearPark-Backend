@@ -5,6 +5,7 @@ import com.mongodb.client.MongoClients;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.mongodb.MongoDatabaseFactory;
 import org.springframework.data.mongodb.config.EnableMongoAuditing;
 import org.springframework.data.mongodb.core.convert.DbRefResolver;
@@ -13,7 +14,9 @@ import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 
-import java.util.Collections;
+import java.time.Instant;
+import java.util.Date;
+import java.util.List;
 
 @Configuration
 @EnableMongoAuditing
@@ -35,13 +38,25 @@ public class DBConfig {
     }
 
     @Bean
+    public MongoCustomConversions customConversions() {
+        return new MongoCustomConversions(List.of(new DateToInstantConverter()));
+    }
+
+    @Bean
     public MappingMongoConverter mappingMongoConverter(
             MongoDatabaseFactory factory,
             MongoMappingContext context
     ) {
         DbRefResolver dbRefResolver = new DefaultDbRefResolver(factory);
         MappingMongoConverter converter = new MappingMongoConverter(dbRefResolver, context);
-        converter.setCustomConversions(new MongoCustomConversions(Collections.emptyList()));
+        converter.setCustomConversions(customConversions());
         return converter;
+    }
+
+    static class DateToInstantConverter implements Converter<Date, Instant> {
+        @Override
+        public Instant convert(Date source) {
+            return source.toInstant();
+        }
     }
 }
