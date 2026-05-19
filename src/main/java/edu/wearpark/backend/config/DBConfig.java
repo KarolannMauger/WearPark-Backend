@@ -2,6 +2,7 @@ package edu.wearpark.backend.config;
 
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
+import com.mongodb.lang.NonNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -45,7 +46,8 @@ public class DBConfig {
 
     @WritingConverter
     static class InstantToDateConverter implements Converter<Instant, Date> {
-        public Date convert(Instant source) {
+        @Override
+        public Date convert(@NonNull Instant source) {
             return Date.from(source);
         }
     }
