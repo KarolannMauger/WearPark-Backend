@@ -35,6 +35,7 @@ public class CommonErrorController {
     @ExceptionHandler(Exception.class)
     ResponseEntity<ApiError> handleAny(Exception ex) {
         log.error(ex.getMessage());
+        log.error(Arrays.toString(ex.getStackTrace()));
         ErrorCode ec = ErrorCode.INTERNAL_ERROR;
         ApiError body = new ApiError(ec.name(), ec.httpCode.value(), ec.description);
         return ResponseEntity.status(ec.httpCode).body(body);
