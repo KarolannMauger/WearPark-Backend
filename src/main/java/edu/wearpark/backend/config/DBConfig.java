@@ -5,6 +5,7 @@ import com.mongodb.client.MongoClients;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.mongodb.MongoDatabaseFactory;
 import org.springframework.data.mongodb.config.EnableMongoAuditing;
@@ -43,6 +44,7 @@ public class DBConfig {
     }
 
     @Bean
+    @Primary
     public MappingMongoConverter mappingMongoConverter(
             MongoDatabaseFactory factory,
             MongoMappingContext context
@@ -50,6 +52,7 @@ public class DBConfig {
         DbRefResolver dbRefResolver = new DefaultDbRefResolver(factory);
         MappingMongoConverter converter = new MappingMongoConverter(dbRefResolver, context);
         converter.setCustomConversions(customConversions());
+        converter.afterPropertiesSet();
         return converter;
     }
 
