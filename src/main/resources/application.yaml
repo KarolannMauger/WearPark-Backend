@@ -1,3 +1,27 @@
 spring:
   application:
     name: app
+
+db:
+  uri:  ${MONGODB_CLIENT_URI:mongodb://localhost:27017/}
+  name: ${MONGODB_DB_NAME:wearpark-dev}
+
+auth:
+  providers:
+    email-password:
+      max-attempts: 5
+      lockout-duration: t5m
+  jwt:
+    secret: ${JWT_SECRET:dev-secret-abcedefghijklmnopqrstuvwxyz}
+    expiration: 1d
+
+netty:
+  port: 9000
+  server-cert-path: ${NETTY_SERVER_CERT_PATH:/app/certs/server.crt}
+  server-key-path:  ${NETTY_SERVER_KEY_PATH:/app/certs/server.key}
+  ca-cert-path:     ${NETTY_CA_CERT_PATH:/app/certs/ca.crt}
+  ca-key-path:      ${NETTY_CA_KEY_PATH:/app/certs/ca.key}
+
+ml:
+  hf-space-url: ${ML_HF_SPACE_URL:https://karolannmauger-wearpark-ml.hf.space}
+  hf-token:     ${ML_HF_TOKEN:}
